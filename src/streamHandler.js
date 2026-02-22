@@ -36,7 +36,6 @@ async function streamHandler({ type, id }) {
                 name: '📡 Live',
                 description: group,
                 behaviorHints: {
-                    notWebReady: true,
                     isLive: true
                 }
             }
