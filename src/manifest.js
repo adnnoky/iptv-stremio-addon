@@ -99,7 +99,11 @@ const manifest = {
       ]
     }
   ],
-  resources: ['catalog', 'stream', 'meta'],
+  resources: [
+    'catalog',
+    { name: 'stream', types: ['tv'], idPrefixes: ['iptv_'] },
+    { name: 'meta', types: ['tv'], idPrefixes: ['iptv_'] }
+  ],
   idPrefixes: ['iptv_'],
   behaviorHints: {
     configurable: false,

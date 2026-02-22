@@ -81,10 +81,22 @@ async function metaHandler({ type, id }) {
 }
 
 /**
- * Preload stub — kept for compatibility with index.js
+ * Preload the full channel index on startup so channels are available
+ * in the store from the very first stream request.
  */
 async function preloadIndex() {
-    console.log('[stream] ID-based decode mode active — no preload needed.');
+    const { fetchM3U, buildM3UUrl } = require('./iptvParser');
+    const { addChannels, storeSize } = require('./channelStore');
+
+    console.log('[preload] Fetching full channel index...');
+    try {
+        const url = buildM3UUrl(null, null); // index.m3u
+        const channels = await fetchM3U(url);
+        const added = addChannels(channels);
+        console.log(`[preload] Indexed ${storeSize()} channels (${added} new)`);
+    } catch (err) {
+        console.error('[preload] Failed:', err.message);
+    }
 }
 
 module.exports = { streamHandler, metaHandler, preloadIndex };
