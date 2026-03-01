@@ -6,13 +6,30 @@ const fetch = require('node-fetch');
 const cache = new Map();
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
+function toBase64Url(value) {
+    return Buffer.from(value, 'utf8')
+        .toString('base64')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/g, '');
+}
+
+function fromBase64Url(value) {
+    const normalized = String(value)
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+    const padding = normalized.length % 4;
+    const withPadding = padding === 0 ? normalized : normalized + '='.repeat(4 - padding);
+    return Buffer.from(withPadding, 'base64').toString('utf8');
+}
+
 /**
  * Encode a stream URL into a stable Stremio-safe channel ID.
  * We use full base64 (NO truncation) so we can decode it back.
  * base64url avoids +, /, = which break URL routing.
  */
 function urlToId(streamUrl) {
-    return 'iptv_' + Buffer.from(streamUrl).toString('base64url');
+    return 'iptv_' + toBase64Url(streamUrl);
 }
 
 /**
@@ -21,7 +38,8 @@ function urlToId(streamUrl) {
 function idToUrl(id) {
     try {
         const b64 = id.replace(/^iptv_/, '');
-        return Buffer.from(b64, 'base64url').toString('utf8');
+        if (!b64) return null;
+        return fromBase64Url(b64);
     } catch (e) {
         return null;
     }

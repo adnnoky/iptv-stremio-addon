@@ -14,15 +14,21 @@ async function streamHandler({ type, id }) {
     console.log(`[stream] Request for id=${id}`);
 
     // 1. Decode the stream URL directly from the id
-    const streamUrl = idToUrl(id);
+    let streamUrl = idToUrl(id);
 
-    if (!streamUrl || !streamUrl.startsWith('http')) {
+    // 1b. Fallback for old/non-encoded ids: resolve from shared store
+    const channel = getChannel(id);
+    if ((!streamUrl || !/^https?:\/\//i.test(streamUrl)) && channel && channel.streamUrl) {
+        streamUrl = channel.streamUrl;
+        console.log('[stream] Resolved URL from channel store fallback');
+    }
+
+    if (!streamUrl || !/^https?:\/\//i.test(streamUrl)) {
         console.warn(`[stream] Could not decode URL from id: ${id}`);
         return { streams: [] };
     }
 
     // 2. Try to get channel metadata from the store for a nice title/description
-    const channel = getChannel(id);
     const name = channel ? channel.name : 'Live TV';
     const group = channel ? (channel.group || 'IPTV') : 'IPTV';
 
@@ -36,7 +42,8 @@ async function streamHandler({ type, id }) {
                 name: '📡 Live',
                 description: group,
                 behaviorHints: {
-                    isLive: true
+                    isLive: true,
+                    notWebReady: true
                 }
             }
         ]

@@ -28,6 +28,7 @@ serveHTTP(addonInterface, { port: PORT, cacheMaxAge: 0 })
         console.log('╚══════════════════════════════════════════════════════╝');
         console.log('');
 
+
         // Preload the full channel index so streams resolve immediately
         preloadIndex().catch(err => console.error('[preload] Error:', err.message));
 
