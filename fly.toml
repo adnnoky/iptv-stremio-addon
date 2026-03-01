@@ -1,0 +1,41 @@
+# Fly.io configuration for IPTV Stremio Addon
+# Deploy with: flyctl deploy
+
+app = "iptv-stremio-addon"
+primary_region = "ams"  # San Jose, CA (you can change to: lhr, ams, syd, fra, etc.)
+
+[build]
+  builder = "heroku"
+
+[env]
+  PORT = "8080"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 8080
+  force_https = false
+  auto_stop_machines = true
+  auto_start_machines = true
+  
+  [http_service.concurrency]
+    hard_limit = 100
+    soft_limit = 50
+
+[checks]
+  [checks.http]
+    grace_period = "10s"
+    interval = "30s"
+    timeout = "5s"
+    method = "GET"
+    path = "/manifest.json"
+    expected_http_status = 200
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 8080
+  processes = ["app"]
+
+  [[services.tcp_checks]]
+    grace_period = "10s"
+    interval = "10s"
+    timeout = "3s"
